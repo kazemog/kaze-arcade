@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Kaze Morales Arcade</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#0b141a;color:#e9edef;max-width:440px;margin:0 auto;min-height:100vh}
+.tabs{display:flex;border-bottom:1px solid #222e35;background:#0b141a;position:sticky;top:0;z-index:10}
+.tab{flex:1;padding:13px 0;text-align:center;font-size:14px;font-weight:600;color:#8696a0;cursor:pointer;border-bottom:2.5px solid transparent}
+.tab.act{color:#e9edef;border-bottom-color:#00a884}
+.pan{display:none;padding:14px}.pan.act{display:block}
+.box{background:#111b21;border:1px solid #222e35;border-radius:16px;padding:14px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.sub{font-size:10px;letter-spacing:1px;color:#8696a0;text-transform:uppercase}
+.tit{font-size:19px;font-weight:700;margin-top:2px}
+.sc{text-align:right}.sc b{font-size:19px;font-family:monospace;display:block}.sc span{font-size:10px;color:#8696a0;font-family:monospace}
+canvas{width:100%;display:block;border-radius:12px;border:1px solid #2a3942;background:#1a242b;touch-action:none}
+.spd{text-align:center;font-size:12px;color:#8696a0;margin-top:10px}
+.sbar{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin:10px 0 12px;color:#8696a0}
+.turn{display:flex;align-items:center;gap:6px;color:#e9edef;font-weight:600}.dot{width:8px;height:8px;border-radius:50%;background:#e9edef}
+.gwrap{position:relative}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#222e35;border:2px solid #222e35;border-radius:14px;overflow:hidden}
+.cell{background:#111b21;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:300;cursor:pointer;transition:background .15s}
+.cell.X{color:#e9edef}.cell.O{color:#00a884}.cell.hi{background:#1a4b6e}
+.mod{position:absolute;inset:0;background:rgba(11,20,26,.78);display:none;align-items:center;justify-content:center;border-radius:14px}
+.mod.show{display:flex}
+.mbox{background:#1f2c34;border:1px solid #2a3942;border-radius:16px;padding:18px;text-align:center;width:78%}
+.mbox b{font-size:18px;display:block;margin-bottom:5px}.mbox p{font-size:12px;color:#8696a0;margin-bottom:14px}
+.mbox button{background:none;border:none;color:#00a884;font-weight:700;font-size:14px;cursor:pointer}
+.lvls{display:flex;gap:6px;margin-top:10px}
+.lb{flex:1;padding:8px 0;border-radius:99px;border:1px solid #2a3942;background:none;color:#8696a0;font-size:12px;cursor:pointer}
+.lb.act{background:#00a884;color:#0b141a;font-weight:700;border-color:#00a884}
+.dctrl{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.dgrp{display:flex;gap:8px}
+.dbtn{width:46px;height:42px;border-radius:10px;border:1px solid #2a3942;background:#182229;color:#e9edef;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dbtn.fire{background:#7f1d1d;border-color:#ef4444}
+.dbtn:active{transform:scale(.94)}
+</style></head><body>
+<div class="tabs">
+  <div class="tab act" id="t0" onclick="sw(0)">Dino Runner</div>
+  <div class="tab" id="t1" onclick="sw(1)">Tic Tac Toe</div>
+  <div class="tab" id="t2" onclick="sw(2)">Doom</div>
+</div>
+
+<div class="pan act" id="p0"><div class="box">
+  <div class="top"><div><div class="sub">KAZE DINO</div><div class="tit">Dino Runner</div></div><div class="sc"><b id="dsc">00000</b><span id="dbst">BEST 00000</span></div></div>
+  <canvas id="dc" width="360" height="165"></canvas>
+  <div class="spd" id="dsp">Speed 5.0x • Ketuk layar untuk lompat</div>
+</div></div>
+
+<div class="pan" id="p1"><div class="box">
+  <div class="top"><div class="tit">Tic-Tac-Toe</div><div class="sub" style="margin-top:6px">Melawan AI</div></div>
+  <div class="sbar"><div class="turn"><div class="dot" id="tdot"></div><span id="tst">Giliranmu</span></div><div>Kamu <b id="sw">0</b> &nbsp;Seri <b id="sd">0</b> &nbsp;AI <b id="sl">0</b></div></div>
+  <div class="gwrap"><div class="grid" id="grid"></div>
+    <div class="mod" id="tmod"><div class="mbox"><b id="mtit">Kamu menang</b><p id="msub">Bagus sekali. Mau coba lagi?</p><button onclick="tReset()">Coba lagi</button></div></div>
+  </div>
+  <div class="sub" style="margin-top:14px">Tingkat lawan</div>
+  <div class="lvls">
+    <button class="lb" id="l0" onclick="setL(0)">Pemula</button>
+    <button class="lb" id="l1" onclick="setL(1)">Terlatih</button>
+    <button class="lb act" id="l2" onclick="setL(2)">Taktisi</button>
+    <button class="lb" id="l3" onclick="setL(3)">Master</button>
+  </div>
+</div></div>
+
+<div class="pan" id="p2"><div class="box">
+  <div class="top"><div><div class="sub">KAZE DOOM</div><div class="tit">Mini Doom FPS</div></div><div class="sc"><b id="dhp">HP 100</b><span id="dam">AMMO 30 • SCORE 0</span></div></div>
+  <canvas id="fc" width="360" height="225"></canvas>
+  <div class="spd" id="drem">5 musuh tersisa</div>
+  <div class="dctrl">
+    <button class="dbtn" id="btnUp">▲</button>
+    <div class="dgrp"><button class="dbtn" id="btnL">◀</button><button class="dbtn fire" id="btnF">🔥</button><button class="dbtn" id="btnR">▶</button></div>
+  </div>
+</div></div>
+
+<script>
+let activeTab=0;
+function sw(i){activeTab=i;[0,1,2].forEach(n=>{document.getElementById('t'+n).classList.toggle('act',n===i);document.getElementById('p'+n).classList.toggle('act',n===i);});}
+const dc=document.getElementById('dc'),dx=dc.getContext('2d');
+let dy=118,dv=0,ds=0,db=Number(localStorage.getItem('k_db')||0),dsp=5.0,dOver=false,obs=[{x:320,w:14,h:28}],cld=[{x:120,y:34},{x:260,y:24}];
+function dJump(){if(dOver){dy=118;dv=0;ds=0;dsp=5.0;dOver=false;obs=[{x:330,w:14,h:28}];return;}if(dy>=118)dv=-11.2;}
+dc.addEventListener('pointerdown',dJump);
+setInterval(()=>{if(activeTab!==0)return;
+  dx.fillStyle='#1f272d';dx.fillRect(0,0,360,165);
+  dx.fillStyle='#5c6b73';cld.forEach(c=>{c.x-=0.7;if(c.x<-40)c.x=370;dx.fillRect(c.x,c.y,30,6);dx.fillRect(c.x+8,c.y-4,14,4);});
+  dx.strokeStyle='#4b5962';dx.setLineDash([7,7]);dx.beginPath();dx.moveTo(0,144);dx.lineTo(360,144);dx.stroke();dx.setLineDash([]);
+  if(!dOver){dy+=dv;if(dy<118)dv+=0.75;else{dy=118;dv=0;}ds+=1;dsp=Math.min(9.5,5+ds/600);
+    if(ds>db){db=ds;localStorage.setItem('k_db',db);}
+    obs.forEach(o=>o.x-=dsp);
+    if(obs[obs.length-1].x<210&&Math.random()<0.04)obs.push({x:370,w:Math.random()>.5?18:13,h:24+Math.random()*12});
+    if(obs[0].x<-25)obs.shift();
+    for(const o of obs)if(o.x<66&&o.x+o.w>44&&dy+26>144-o.h)dOver=true;
+  }
+  dx.fillStyle='#f1f5f9';dx.fillRect(46,dy,20,20);dx.fillRect(56,dy-6,12,8);dx.fillRect(48,dy+20,5,6);dx.fillRect(58,dy+20,5,6);
+  dx.fillStyle='#f87171';obs.forEach(o=>{dx.fillRect(o.x,144-o.h,o.w,o.h);dx.fillRect(o.x-5,144-o.h+6,5,9);dx.fillRect(o.x+o.w,144-o.h+8,5,9);});
+  if(dOver){dx.fillStyle='rgba(11,20,26,.72)';dx.fillRect(0,0,360,165);dx.fillStyle='#00a884';dx.font='bold 16px sans-serif';dx.fillText('GAME OVER • KETUK UNTUK ULANG',48,88);}
+  document.getElementById('dsc').innerText=String(ds).padStart(5,'0');document.getElementById('dbst').innerText='BEST '+String(db).padStart(5,'0');document.getElementById('dsp').innerText='Speed '+dsp.toFixed(1)+'x';
+},30);
+
+let tb=Array(9).fill(''),tlvl=2,tw=0,td=0,tl=0,tlock=false,lastTap=-1;
+const TW=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const tWin=(b,p)=>TW.some(w=>w.every(i=>b[i]===p));
+function tDraw(){const g=document.getElementById('grid');g.innerHTML='';tb.forEach((v,i)=>{const c=document.createElement('div');c.className='cell '+v+(i===lastTap?' hi':'');c.innerText=v==='X'?'✕':v==='O'?'◯':'';c.onclick=()=>tTap(i);g.appendChild(c);});}
+function setL(l){tlvl=l;[0,1,2,3].forEach(n=>document.getElementById('l'+n).classList.toggle('act',n===l));tReset();}
+function tEnd(t,s){tlock=true;document.getElementById('tst').innerText=t;document.getElementById('mtit').innerText=t;document.getElementById('msub').innerText=s;document.getElementById('tmod').classList.add('show');}
+function mm(b,mx){if(tWin(b,'O'))return 10;if(tWin(b,'X'))return -10;if(!b.includes(''))return 0;let bs=mx?-99:99;for(let i=0;i<9;i++)if(!b[i]){b[i]=mx?'O':'X';let v=mm(b,!mx);b[i]='';bs=mx?Math.max(bs,v):Math.min(bs,v);}return bs;}
+function tTap(i){if(tlock||tb[i])return;tb[i]='X';lastTap=i;tDraw();
+  if(tWin(tb,'X')){tw++;document.getElementById('sw').innerText=tw;return tEnd('Kamu menang','Bagus sekali. Mau coba lagi?');}
+  let av=tb.map((v,k)=>v===''?k:-1).filter(k=>k>=0);if(!av.length){td++;document.getElementById('sd').innerText=td;return tEnd('Seri!','Pertandingan seimbang.');}
+  tlock=true;document.getElementById('tst').innerText='AI berpikir...';
+  setTimeout(()=>{let m=-1;
+    if(tlvl===3){let bs=-99;for(let x of av){tb[x]='O';let v=mm(tb,false);tb[x]='';if(v>bs){bs=v;m=x;}}}
+    else{if(tlvl>=1)for(let x of av){tb[x]='O';if(tWin(tb,'O'))m=x;tb[x]='';}if(m<0&&tlvl>=2)for(let x of av){tb[x]='X';if(tWin(tb,'X'))m=x;tb[x]='';}if(m<0)m=(av.includes(4)&&tlvl>=1)?4:av[Math.floor(Math.random()*av.length)];}
+    tb[m]='O';lastTap=-1;tDraw();
+    if(tWin(tb,'O')){tl++;document.getElementById('sl').innerText=tl;return tEnd('AI menang','Coba lagi yuk!');}
+    if(!tb.includes('')){td++;document.getElementById('sd').innerText=td;return tEnd('Seri!','Pertandingan seimbang.');}
+    tlock=false;document.getElementById('tst').innerText='Giliranmu';
+  },280);
+}
+function tReset(){tb.fill('');lastTap=-1;tlock=false;document.getElementById('tmod').classList.remove('show');document.getElementById('tst').innerText='Giliranmu';tDraw();}
+tDraw();
+</script><script src="doom.js"></script></body></html>
