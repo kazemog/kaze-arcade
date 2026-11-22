@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Kaze 3D Music</title>
+<style>
+:root{--bg:#060913;--card:#0f1629;--el:#172038;--bdr:#27345a;--txt:#eef2ff;--mut:#8b9bb8;--pur:#7c3aed;--cyn:#00d4aa;--blu:#5c7cfa}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:radial-gradient(circle at 50% 0%,#1d1145 0%,var(--bg) 62%);color:var(--txt);max-width:440px;margin:0 auto;min-height:100vh;padding:12px 14px 24px;overflow-x:hidden}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.brand{font-size:11px;font-weight:800;letter-spacing:1.4px;color:#a78bfa}
+.badge{font-size:10px;font-weight:700;padding:4px 9px;border-radius:99px;background:rgba(0,212,170,.14);border:1px solid rgba(0,212,170,.45);color:var(--cyn)}
+.sbox{display:flex;gap:6px;margin-bottom:12px}
+.sbox input{flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:10px 12px;color:#fff;font-size:13px;outline:none}
+.sbox input:focus{border-color:var(--pur)}
+.sbox button{background:linear-gradient(135deg,var(--pur),#4f46e5);border:none;border-radius:12px;padding:0 14px;color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+.modes{display:flex;gap:6px;background:#0a0f1f;padding:4px;border-radius:12px;border:1px solid var(--bdr);margin-bottom:12px}
+.modes button{flex:1;padding:7px 4px;border:none;border-radius:8px;background:none;color:var(--mut);font-size:11px;font-weight:700;cursor:pointer;transition:.15s}
+.modes button.act{background:var(--el);color:#fff;box-shadow:0 2px 10px rgba(124,58,237,.35)}
+
+/* 3D STAGE */
+.stage{perspective:950px;padding:8px 0 14px;touch-action:none}
+.card3d{position:relative;background:linear-gradient(155deg,#171c3a 0%,#0b1020 55%,#12102b 100%);border:1px solid #35457a;border-radius:22px;padding:18px 16px;transform-style:preserve-3d;transition:transform .12s ease-out;box-shadow:0 22px 45px rgba(0,0,0,.65),0 0 28px rgba(124,58,237,.22)}
+.glow{position:absolute;inset:-2px;border-radius:22px;background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(0,212,170,.25),transparent);filter:blur(14px);z-index:-1;transform:translateZ(-20px)}
+.visual{height:178px;display:flex;align-items:center;justify-content:center;position:relative;transform-style:preserve-3d;margin-bottom:12px}
+
+/* MODE 0: VINYL 3D */
+.vinyl-wrap{position:relative;width:152px;height:152px;transform-style:preserve-3d;transform:translateZ(36px)}
+.vinyl{width:100%;height:100%;border-radius:50%;background:repeating-radial-gradient(#0b0e18 0 4px,#1b233d 5px 7px);border:2px solid #4c1d95;box-shadow:0 16px 32px rgba(0,0,0,.7),0 0 24px rgba(124,58,237,.4);display:flex;align-items:center;justify-content:center;animation:spin 6s linear infinite;animation-play-state:paused}
+.playing .vinyl{animation-play-state:running}
+.vcore{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#00d4aa 0%,#4f46e5 58%,#0b0e18 62%);border:3px solid #e0e7ff;box-shadow:0 0 16px rgba(0,212,170,.6);display:flex;align-items:center;justify-content:center;font-size:18px}
+.orbit-ring{position:absolute;inset:-14px;border-radius:50%;border:1.5px dashed rgba(0,212,170,.45);transform:rotateX(68deg) translateZ(-6px);pointer-events:none}
+.orbit-dot{position:absolute;top:-5px;left:50%;width:10px;height:10px;border-radius:50%;background:var(--cyn);box-shadow:0 0 12px var(--cyn);transform:translateX(-50%)}
+.playing .orbit-ring{animation:orbit 5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes orbit{from{transform:rotateX(68deg) rotateZ(0deg)}to{transform:rotateX(68deg) rotateZ(360deg)}}
+
+/* MODE 1: HOLO CUBE / RING 3D */
+.holo{display:none;position:relative;width:140px;height:140px;transform-style:preserve-3d;transform:translateZ(42px)}
+.ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--pur);box-shadow:0 0 18px rgba(124,58,237,.5)}
+.r1{transform:rotateX(65deg);animation:rspin1 4s linear infinite}
+.r2{transform:rotateY(65deg);border-color:var(--cyn);animation:rspin2 5s linear infinite}
+.r3{inset:24px;border-color:var(--blu);transform:translateZ(18px);display:flex;align-items:center;justify-content:center;font-size:32px;background:rgba(15,22,41,.8)}
+@keyframes rspin1{to{transform:rotateX(65deg) rotateZ(360deg)}}
+@keyframes rspin2{to{transform:rotateY(65deg) rotateZ(-360deg)}}
+
+/* MODE 2: 3D EQUALIZER SPECTRUM */
+.eq3d{display:none;align-items:flex-end;justify-content:center;gap:6px;height:125px;width:100%;transform:translateZ(44px);padding:0 10px}
+.bar{width:11px;min-height:14px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--cyn),var(--pur));box-shadow:0 0 12px rgba(124,58,237,.55);transition:height .09s ease}
+
+.info3d{text-align:center;transform:translateZ(30px)}
+.title{font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.artist{font-size:12px;color:#a5b4fc;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spatial{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;color:var(--cyn);background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);padding:3px 10px;border-radius:99px}
+.hint{text-align:center;font-size:10px;color:var(--mut);margin-top:6px;transform:translateZ(16px)}
+
+/* CONTROLS */
+.prog{margin-top:12px;transform:translateZ(24px)}
+.prog input{width:100%;accent-color:var(--cyn);height:4px;cursor:pointer}
+.times{display:flex;justify-content:space-between;font-size:10px;color:var(--mut);font-family:monospace;margin-top:3px}
+.ctrls{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;transform:translateZ(38px)}
+.cb{width:44px;height:44px;border-radius:14px;border:1px solid var(--bdr);background:var(--el);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cb:active{transform:scale(.92)}
+.cb.play{width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,var(--cyn),#059669);border-color:#34d399;color:#041511;font-size:22px;box-shadow:0 0 20px rgba(0,212,170,.45)}
+
+/* QUEUE */
+.qtit{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--mut);margin:14px 2px 8px;text-transform:uppercase}
+.qlist{display:flex;flex-direction:column;gap:7px}
+.qitem{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--bdr);border-radius:13px;padding:10px 12px;cursor:pointer;transition:.12s}
+.qitem.act{border-color:var(--cyn);background:#102230}
+.qitem b{font-size:13px;display:block}.qitem span{font-size:11px;color:var(--mut)}
+.qdur{font-size:11px;font-family:monospace;color:var(--cyn)}
+</style></head><body>
+
+<div class="top">
+  <div class="brand">◈ KAZE 3D SPATIAL AUDIO</div>
+  <div class="badge" id="panLbl">3D ORBIT: CENTER</div>
+</div>
+
+<div class="sbox">
+  <input id="qIn" placeholder="Cari judul lagu atau penyanyi..." />
+  <button onclick="doSearch()">Cari</button>
+</div>
+
+<div class="modes">
+  <button class="act" id="m0" onclick="setMode(0)">💿 Vinyl 3D</button>
+  <button id="m1" onclick="setMode(1)">🌌 Holo 3D</button>
+  <button id="m2" onclick="setMode(2)">📊 Wave 3D</button>
+</div>
+
+<div class="stage" id="stage">
+  <div class="card3d" id="card3d">
+    <div class="glow"></div>
+    <div class="visual">
+      <div class="vinyl-wrap" id="v0">
+        <div class="orbit-ring"><div class="orbit-dot"></div></div>
+        <div class="vinyl"><div class="vcore">🎧</div></div>
+      </div>
+      <div class="holo" id="v1">
+        <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3">🎵</div>
+      </div>
+      <div class="eq3d" id="v2"></div>
+    </div>
+    <div class="info3d">
+      <div class="title" id="tTitle">Memuat Lagu 3D...</div>
+      <div class="artist" id="tArtist">Kaze MoralesBot</div>
+      <div class="spatial" id="spTxt">🎧 Gunakan Earphone • Full MP3 3D dikirim ke chat WA</div>
+    </div>
+    <div class="prog">
+      <input type="range" id="seek" min="0" max="100" value="0" />
+      <div class="times"><span id="tCur">0:00</span><span id="tDur">0:30</span></div>
+    </div>
+    <div class="ctrls">
+      <button class="cb" onclick="prev()">⏮</button>
+      <button class="cb play" id="pBtn" onclick="togglePlay()">▶</button>
+      <button class="cb" onclick="next()">⏭</button>
+    </div>
+    <div class="hint">👆 Geser kartu ke segala arah untuk memutar sudut 3D</div>
+  </div>
+</div>
+
+<div class="qtit">Antrean Lagu</div>
+<div class="qlist" id="qlist"></div>
+<audio id="aud" playsinline></audio>
+
+<script>
+const aud = document.getElementById('aud'), card = document.getElementById('card3d'), stage = document.getElementById('stage');
+const eqWrap = document.getElementById('v2');
+const bars = [];
+for (let i = 0; i < 16; i++) {
+  const b = document.createElement('div'); b.className = 'bar'; b.style.height = '18px';
+  eqWrap.appendChild(b); bars.push(b);
+}
+
+let tracks = [], idx = 0, mode = 0, playing = false, ang = 0;
+
+function setMode(m) {
+  mode = m;
+  [0,1,2].forEach(n => {
+    document.getElementById('m' + n).classList.toggle('act', n === m);
+    document.getElementById('v' + n).style.display = n === m ? (n === 2 ? 'flex' : 'block') : 'none';
+  });
+}
+
+// 3D Touch / Pointer Tilt Interaktif
+let dragging = false, rx = 0, ry = 0;
+function applyTilt(x, y) {
+  const rect = stage.getBoundingClientRect();
+  const nx = ((x - rect.left) / rect.width - 0.5) * 2;
+  const ny = ((y - rect.top) / rect.height - 0.5) * 2;
+  ry = Math.max(-24, Math.min(24, nx * 24));
+  rx = Math.max(-18, Math.min(18, -ny * 18));
+  card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+}
+stage.addEventListener('pointerdown', e => { if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return; dragging = true; applyTilt(e.clientX, e.clientY); });
+stage.addEventListener('pointermove', e => { if (dragging) applyTilt(e.clientX, e.clientY); });
+['pointerup','pointercancel','pointerleave'].forEach(ev => stage.addEventListener(ev, () => { dragging = false; card.style.transform = 'rotateX(0deg) rotateY(0deg)'; }));
+
+const fmt = s => { s = Math.floor(s || 0); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+
+function renderQueue() {
+  document.getElementById('qlist').innerHTML = tracks.map((t, i) => `
+    <div class="qitem ${i === idx ? 'act' : ''}" onclick="loadTrack(${i}, true)">
+      <div><b>${i === idx ? '▶ ' : ''}${t.t}</b><span>${t.a} • ${t.alb}</span></div>
+      <div class="qdur">${t.d}</div>
+    </div>`).join('');
+}
+
+function loadTrack(i, auto = false) {
+  if (!tracks[i]) return;
+  idx = i;
+  const tr = tracks[i];
+  document.getElementById('tTitle').innerText = tr.t;
+  document.getElementById('tArtist').innerText = `${tr.a} • ${tr.alb}`;
+  aud.src = tr.p || '';
+  renderQueue();
+  if (auto && tr.p) aud.play().catch(() => {});
+}
+
+function togglePlay() {
+  if (!aud.src) return;
+  if (aud.paused) aud.play().catch(() => {});
+  else aud.pause();
+}
+function next() { if (tracks.length) loadTrack((idx + 1) % tracks.length, true); }
+function prev() { if (tracks.length) loadTrack((idx - 1 + tracks.length) % tracks.length, true); }
+
+aud.addEventListener('play', () => { playing = true; document.body.classList.add('playing'); document.getElementById('pBtn').innerText = '⏸'; });
+aud.addEventListener('pause', () => { playing = false; document.body.classList.remove('playing'); document.getElementById('pBtn').innerText = '▶'; });
+aud.addEventListener('ended', next);
+aud.addEventListener('timeupdate', () => {
+  if (aud.duration) {
+    document.getElementById('seek').value = (aud.currentTime / aud.duration) * 100;
+    document.getElementById('tCur').innerText = fmt(aud.currentTime);
+    document.getElementById('tDur').innerText = fmt(aud.duration);
+  }
+});
+document.getElementById('seek').addEventListener('input', e => { if (aud.duration) aud.currentTime = (e.target.value / 100) * aud.duration; });
+
+// Animasi Equalizer 3D & Radar Orbit Spatial
+setInterval(() => {
+  ang += playing ? 0.14 : 0.03;
+  const pan = Math.sin(ang);
+  document.getElementById('panLbl').innerText = playing
+    ? (pan < -0.35 ? '3D ORBIT: ◀ LEFT' : pan > 0.35 ? '3D ORBIT: RIGHT ▶' : '3D ORBIT: ◉ FRONT')
+    : '3D READY';
+  bars.forEach((b, i) => {
+    const h = playing ? (24 + Math.abs(Math.sin(ang * 2.2 + i * 0.55)) * 86) : (16 + Math.sin(ang + i * 0.4) * 6);
+    b.style.height = Math.round(h) + 'px';
+  });
+}, 80);
+
+async function searchMusic(q) {
+  document.getElementById('tTitle').innerText = 'Mencari: ' + q + '...';
+  try {
+    const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=6`);
+    const j = await r.json();
+    if (j.results && j.results.length) {
+      tracks = j.results.map(x => ({
+        t: x.trackName || q, a: x.artistName || 'Artis', alb: x.collectionName || 'Single',
+        d: fmt((x.trackTimeMillis || 0) / 1000), p: x.previewUrl || ''
+      }));
+      loadTrack(0, false);
+      return;
+    }
+  } catch {}
+  document.getElementById('tTitle').innerText = q;
+  document.getElementById('tArtist').innerText = 'Putar Full MP3 3D di chat WhatsApp';
+}
+
+function doSearch() {
+  const v = document.getElementById('qIn').value.trim();
+  if (v) searchMusic(v);
+}
+document.getElementById('qIn').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+const qParam = new URLSearchParams(location.search).get('q') || 'Komang Raim Laode';
+document.getElementById('qIn').value = qParam;
+searchMusic(qParam);
+</script></body></html>
